@@ -1,18 +1,17 @@
-import pickle
 import struct
-import threading
 from dataclasses import dataclass
 
 import cv2
 import numpy as np
+from ultralytics import YOLO
 
 from temp.temp import temp
 
 
 @dataclass
-class HandleImageData:
-    temp: str
-    # image_bytes: bytes
+class DataToClient:
+    typeOfObject: str
+    image_bytes: bytes
 
 def dummy():
     pass
@@ -20,9 +19,9 @@ def dummy():
 def handle_client(client):
     while True:
         img = receive_img(client)
+        # client.sendall("fdsfds")
         print(temp(img))
 
-#todo check if it works
 def receive_img(conn):
     # Receive image size first (4 bytes, network byte order)
     size_data = conn.recv(4)
@@ -45,8 +44,9 @@ def receive_img(conn):
     img = bytes_to_image(img_bytes)
     return img
 
-def handle_img(data):
-    print(data)
+def handle_img(img):
+    model = YOLO("yolov8n.pt")
+    results = model(img)
 
 
 def bytes_to_image(img_bytes: bytes) -> np.ndarray:
