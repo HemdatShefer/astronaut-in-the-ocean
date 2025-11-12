@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 def handle_result(client, result):
-    data = build_response_json(client, result)
+    data = build_response_json2(client, result)
     client.sendall(data.encode())
 
 def receive_img(client):
@@ -44,6 +44,31 @@ def build_response_json(client, result):
             "confidence": float(box.conf[0]),
             "bbox": [x1, y1, x2, y2]
         })
+
+    return json.dumps({
+        "client": getattr(client, "name", "Unknown"),
+        "timestamp": datetime.now().isoformat(),
+        "detections_count": len(detections),
+        "detections": detections
+    })
+
+def build_response_json2(client, result):
+    detections = []
+    for box in result:
+        try:
+            cls = box['class']
+            subtype = box['subclass']
+            confidence = box['confidence']
+            x1, y1, x2, y2 = box['bbox']
+
+            detections.append({
+                "class": cls,
+                "subtype": subtype,
+                "confidence": confidence,
+                "bbox": [x1, y1, x2, y2]
+            })
+        except:
+            pass
 
     return json.dumps({
         "client": getattr(client, "name", "Unknown"),

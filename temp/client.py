@@ -1,38 +1,58 @@
-import socket
-import cv2
-import time
+import json
+from datetime import datetime
 
-UDP_IP = "127.0.0.1"   # Change to server IP if remote
-UDP_PORT = 5005
-CHUNK_SIZE = 60000
-CHUNK_END = b"END"
+def build_response_json2(client, result):
+    detections = []
+    for box in result:
+        try:
+            cls = box['cls']
+            subtype = box['subtype']
+            confidence = box['conf']
+            x1, y1, x2, y2 = box['bbox']
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.settimeout(10)
+            detections.append({
+                "class": cls,
+                "subtype": subtype,
+                "confidence": confidence,
+                "bbox": [x1, y1, x2, y2]
+            })
+        except:
+            pass
 
-# Load the image
-img = cv2.imread("ocean-with-boat.jpg")
-if img is None:
-    raise FileNotFoundError("Image file not found!")
+    return json.dumps({
+        "client": getattr(client, "name", "Unknown"),
+        "timestamp": datetime.now().isoformat(),
+        "detections_count": len(detections),
+        "detections": detections
+    })
 
-# Encode as JPEG
-_, encoded = cv2.imencode(".jpg", img)
-data = encoded.tobytes()
-print(f"[CLIENT] Image size: {len(data)} bytes")
+data = [{'bbox': [217.7877960205078, 209.75534057617188, 344.3542785644531, 325.34124755859375], 'conf': 0.880859375, 'cls': 'boat', 'subtype': 'coast guard ship', 'clip_delta': 0.101809561252594}, {'bbox': [511.86669921875, 39.809600830078125, 549.9532470703125, 88.53834533691406], 'conf': 0.86962890625, 'cls': 'boat', 'subtype': 'boat', 'clip_delta': 0.06382784247398376}, {'bbox': [1040.375, 228.375, 1228.25, 434.5], 'conf': 0.79443359375, 'cls': 'boat', 'subtype': 'boat', 'clip_delta': 0.0790492594242096}, {'bbox': [416.25, 352.5, 735.75, 557.0], 'conf': 0.6517278117585467, 'cls': 'boat', 'subtype': 'boat', 'clip_delta': 0.08204272389411926}, {'bbox': [270.5082702636719, 277.28387451171875, 276.299072265625, 291.67279052734375], 'conf': 0.509765625, 'cls': 'person'}, {'bbox': [277.79356479644775, 278.11023712158203, 282.9505205154419, 292.0494842529297], 'conf': 0.43115234375, 'cls': 'person'}, {'bbox': [284.0746521949768, 277.8854179382324, 289.189453125, 292.2743034362793], 'conf': 0.416748046875, 'cls': 'person'}, {'bbox': [631.1111450195312, 5.333333611488342, 986.6667175292969, 320.44445037841797], 'conf': 0.33428961094679377, 'cls': 'boat', 'subtype': 'boat', 'clip_delta': 0.09110972285270691}, {'bbox': [558.1806640625, 207.0321044921875, 1198.843505859375, 518.0789184570312], 'conf': 0.2898194944087443, 'cls': 'boat', 'subtype': 'boat', 'clip_delta': 0.09688793122768402}, {'bbox': [251.42564561218023, 276.5364646911621, 256.44208431243896, 291.8246650695801], 'conf': 0.273681640625, 'cls': 'person'}, {'bbox': [138.073974609375, 259.5572204589844, 693.3328247070312, 590.9625854492188], 'conf': 0.19049232921817313, 'cls': 'boat', 'subtype': 'boat', 'clip_delta': 0.08395446836948395}]
 
-# Send image in chunks
-for i in range(0, len(data), CHUNK_SIZE):
-    chunk = data[i:i+CHUNK_SIZE]
-    sock.sendto(chunk, (UDP_IP, UDP_PORT))
-    time.sleep(0.001)  # small delay helps prevent packet loss
+print(build_response_json(None, data))
 
-# Send end marker
-sock.sendto(CHUNK_END, (UDP_IP, UDP_PORT))
-print("[CLIENT] Image sent, waiting for reply...")
+def temp():
+    data = [
+        {'bbox': [217.7877960205078, 209.75534057617188, 344.3542785644531, 325.34124755859375], 'conf': 0.880859375,
+         'cls': 'boat', 'subtype': 'coast guard ship', 'clip_delta': 0.101809561252594},
+        {'bbox': [511.86669921875, 39.809600830078125, 549.9532470703125, 88.53834533691406], 'conf': 0.86962890625,
+         'cls': 'boat', 'subtype': 'boat', 'clip_delta': 0.06382784247398376},
+        {'bbox': [1040.375, 228.375, 1228.25, 434.5], 'conf': 0.79443359375, 'cls': 'boat', 'subtype': 'boat',
+         'clip_delta': 0.0790492594242096},
+        {'bbox': [416.25, 352.5, 735.75, 557.0], 'conf': 0.6517278117585467, 'cls': 'boat', 'subtype': 'boat',
+         'clip_delta': 0.08204272389411926},
+        {'bbox': [270.5082702636719, 277.28387451171875, 276.299072265625, 291.67279052734375], 'conf': 0.509765625,
+         'cls': 'person'},
+        {'bbox': [277.79356479644775, 278.11023712158203, 282.9505205154419, 292.0494842529297], 'conf': 0.43115234375,
+         'cls': 'person'},
+        {'bbox': [284.0746521949768, 277.8854179382324, 289.189453125, 292.2743034362793], 'conf': 0.416748046875,
+         'cls': 'person'}, {'bbox': [631.1111450195312, 5.333333611488342, 986.6667175292969, 320.44445037841797],
+                            'conf': 0.33428961094679377, 'cls': 'boat', 'subtype': 'boat',
+                            'clip_delta': 0.09110972285270691},
+        {'bbox': [558.1806640625, 207.0321044921875, 1198.843505859375, 518.0789184570312], 'conf': 0.2898194944087443,
+         'cls': 'boat', 'subtype': 'boat', 'clip_delta': 0.09688793122768402},
+        {'bbox': [251.42564561218023, 276.5364646911621, 256.44208431243896, 291.8246650695801], 'conf': 0.273681640625,
+         'cls': 'person'}, {'bbox': [138.073974609375, 259.5572204589844, 693.3328247070312, 590.9625854492188],
+                            'conf': 0.19049232921817313, 'cls': 'boat', 'subtype': 'boat',
+                            'clip_delta': 0.08395446836948395}]
 
-# Wait for reply
-try:
-    reply, _ = sock.recvfrom(1024)
-    print("[CLIENT] Server replied:", reply.decode())
-except socket.timeout:
-    print("[CLIENT] No reply received (timeout).")
+    print(data[0]['cls'])

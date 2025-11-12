@@ -1,6 +1,6 @@
 import socket
 
-from client_handler import handle_client
+from api.client_handler import handle_client
 
 HOST = 'localhost'
 PORT = 9000
@@ -16,6 +16,8 @@ try:
     client, addr = server_socket.accept()
     clients.append(client)
     handle_client(client)
+except Exception as e:
+    print("CLOSE!")
 finally:
     print("Closing server...")
     for c in clients:

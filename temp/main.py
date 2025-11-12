@@ -7,7 +7,7 @@ model = YOLO("yolov8n.pt")
 results = model("temp.jpg")
 
 print("AAA")
-print(results[0])
+print(results[0].boxes[0])
 print("BBB")
 # Show and print info
 for r in results:
