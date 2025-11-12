@@ -1,6 +1,6 @@
 import socket
 
-from main.api.client_handler import handle_client
+from client_handler import handle_client
 
 HOST = 'localhost'
 PORT = 9000

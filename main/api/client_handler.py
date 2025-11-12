@@ -1,8 +1,10 @@
-from main.api.utils import receive_img
+from utils import receive_img
+from temp.temp import temp
 
 
 def handle_client(client):
     while True:
         img = receive_img(client)
-        # result = model(img)
+        result = temp(img)
+        print(result)
         # handle_result(result)
